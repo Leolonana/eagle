@@ -13,6 +13,7 @@ export abstract class BaseProtocol {
 
     private readonly Package = "com/eagle/base/jni/";
     private readonly Class = "PlatformSystem";
+    private readonly Method = "onOpenProtocol";
 
 
     public openProtocol(url: string) {
@@ -22,16 +23,16 @@ export abstract class BaseProtocol {
         }
 
         let body = url.split(this.Head)[1]
-        let method = body.split(this.Separator)[1]
+        let func = body.split(this.Separator)[1]
         let args = body.split(this.Separator)[2] || "null"
 
         if (PlatformUtil.isAndroid() || PlatformUtil.isIOS()) {
             return this.callNative({
                 package: this.Package,
                 class: this.Class,
-                method: method,
-                sign: "(S)S",
-                args: [args]
+                method: this.Method,
+                sign: "(SS)S",
+                args: [func, args]
             });
         } else {
             //TODO when call the other host platform
