@@ -5,34 +5,33 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
-import { CallNative } from "../../Framwork/NativeBridge/CallNative";
+import { Protocol } from "../../GameBase/Protocol/Protocol";
+import { SceneBase } from "../../GameBase/Base/SceneBase";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class LoadingScene extends cc.Component {
 
     // LIFE-CYCLE CALLBACKS:
 
-    onLoad () {
-        cc.log("ccc lifecycle onLoad");
+    onLoad() {
+
     }
 
-    start () {
-        cc.log("ccc lifecycle start");
-        let sceneId = CallNative.instance.callSceneData()
-        let sceneName;
-        if (sceneId == 1) {
-            sceneName = "Main";
-        } else {
-            sceneName = "Main2";
-        }
-
-        //自动跳转到对应场景
-        this.scheduleOnce(()=>{
-            cc.log("turn to ", sceneName)
-            cc.director.loadScene(sceneName)
-        }, 1)
+    start() {
+        let conf = Protocol.instance.readConf();
+        let scene = conf.scene;
+        cc.director.preloadScene(scene, (completedCount: number, totalCount: number, item: any) => {
+            cc.log(`loadScene ${scene} completed ${completedCount}, total ${totalCount}`);
+            if (completedCount >= totalCount) {
+                //进入场景
+                cc.director.loadScene(scene, () => {
+                    let sceneComp = cc.director.getScene().getComponentInChildren(SceneBase);
+                    sceneComp.initialize(conf.data);
+                });
+            }
+        });
     }
 
     // update (dt) {}
@@ -49,5 +48,5 @@ export default class LoadingScene extends cc.Component {
         console.log("ccc lifecycle onDestroy");
 
     }
-    
+
 }

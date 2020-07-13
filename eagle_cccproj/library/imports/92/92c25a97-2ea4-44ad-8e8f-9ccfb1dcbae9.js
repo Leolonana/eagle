@@ -18,6 +18,7 @@ var BaseProtocol = /** @class */ (function () {
         this.Separator = "?";
         this.Package = "com/eagle/base/jni/";
         this.Class = "PlatformSystem";
+        this.Method = "onOpenProtocol";
     }
     BaseProtocol.prototype.openProtocol = function (url) {
         if (!url || !url.split(this.Head)[1]) {
@@ -25,15 +26,15 @@ var BaseProtocol = /** @class */ (function () {
             return;
         }
         var body = url.split(this.Head)[1];
-        var method = body.split(this.Separator)[1];
+        var func = body.split(this.Separator)[1];
         var args = body.split(this.Separator)[2] || "null";
         if (PlatformUtil_1.PlatformUtil.isAndroid() || PlatformUtil_1.PlatformUtil.isIOS()) {
             return this.callNative({
                 package: this.Package,
                 class: this.Class,
-                method: method,
-                sign: "(S)S",
-                args: [args]
+                method: this.Method,
+                sign: "(SS)S",
+                args: [func, args]
             });
         }
         else {
